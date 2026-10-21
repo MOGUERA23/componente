@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ejercicios con Vectores Numericos</title>
+    <style>
+        table td {
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <h4>Ejercicio con Vectores</h4>
+    <div>
+        <table>
+            <tbody>
+                <tr>
+                    <td>Dimension del arreglo:</td>
+                    <td>
+                        <select id="select-dimension-arreglo">
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                            <option value="6">6</option>
+                            <option value="7">7</option>
+                            <option value="8">8</option>
+                            <option value="9">9</option>
+                            <option value="10">10</option>
+                            <option value="15">15</option>
+                            <option value="20">20</option>
+                            <option value="25">25</option>
+                            <option value="30">30</option>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Ingrese valor a buscar:</td>
+                    <td><input type="text" name="" id="id-valor-busqueda" maxlength="4" size="5"></td>
+                </tr>
+            </tbody>
+        </table>
+
+
+    </div>
+    <br>
+    <table id="id-table-vector-numerico" border="1" cellspacing="1" cellpadding="1">
+        <thead>
+            <tr>
+                <td colspan="10">Vector numerico de N elementos</td>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>0</td>
+                <td>1</td>
+                <td>2</td>
+                <td>3</td>
+                <td>4</td>
+                <td>5</td>
+                <td>6</td>
+                <td>7</td>
+                <td>8</td>
+                <td>9</td>
+            </tr>
+            <tr>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+            </tr>
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="5"><button id="btn-cargar-vector">Cargar Vector</button></td>
+                <td colspan="5"><button id="btn-vaciar-vector">Vaciar Vector</button></td>
+            </tr>
+            <tr>
+                <td colspan="5"><button id="btn-numero-mayor">Numero Mayor</button></td>
+                <td colspan="5"><button id="btn-numero-menor">Numero Menor</button></td>
+            </tr>
+            <tr>
+                <td colspan="5"><button id="btn-sumar-valores">Suma de Valores</button></td>
+                <td colspan="5"><button id="btn-producto-vector">Producto de Valores</button></td>
+            </tr>
+            <tr>
+                <td colspan="5">
+                    <button id="btn-calcular-moda">Moda</button>
+                </td>
+                <td colspan="5">
+                    <button id="btn-calcular-media">Media</button>
+                    <button id="btn-calcular-mediana">Mediana</button>
+                </td>
+            </tr>
+            <!-- NUEVO: selector de orden y botones de ordenamiento -->
+            <tr>
+                <td colspan="10">
+                    Orden:
+                    <select id="select-orden">
+                        <option value="ASC">Ascendente (ASC)</option>
+                        <option value="DESC">Descendente (DESC)</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="5"><button id="btn-ordenar-seleccion">Ordenar Selección</button></td>
+                <td colspan="5"><button id="btn-ordenar-burbuja">Ordenar Burbuja</button></td>
+            </tr>
+        </tfoot>
+    </table>
+    <hr>
+    <table>
+        <thead>
+            <tr>
+                <td colspan="2">Calculos con vectores </td>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Resultado:</td>
+                <td colspan="2"><input type="text" id="id-txt-respuesta" size="70"></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <script>
+        // =====================================================================
+        // BASE COMPARTIDA (no modificar: es igual para todos los integrantes)
+        // =====================================================================
+
+        // Vector global: aquí viven los números. Todas las funciones lo usan.
+        let vector = [];
+
+        // Elementos de la página que ya existen en el HTML
+        const selectDimension = document.getElementById("select-dimension-arreglo");
+        const selectOrden = document.getElementById("select-orden");
+        const tablaVector = document.getElementById("id-table-vector-numerico");
+        const txtRespuesta = document.getElementById("id-txt-respuesta");
+
+        // Escribe un mensaje en la casilla "Resultado"
+        function mostrarRespuesta(texto) {
+            txtRespuesta.value = texto;
+        }
+
+        // Dibuja el vector en la tabla, de 10 en 10 columnas
+        // (fila de índices arriba, fila de valores abajo)
+        function mostrarVector() {
+            const cuerpo = tablaVector.querySelector("tbody");
+            cuerpo.innerHTML = "";
+
+            if (vector.length === 0) {
+                cuerpo.innerHTML = "<tr><td colspan='10'>(vector vacío)</td></tr>";
+                return;
+            }
+
+            for (let inicio = 0; inicio < vector.length; inicio += 10) {
+                const filaIndices = document.createElement("tr");
+                const filaValores = document.createElement("tr");
+                for (let i = inicio; i < inicio + 10 && i < vector.length; i++) {
+                    filaIndices.innerHTML += "<td>" + i + "</td>";
+                    filaValores.innerHTML += "<td>" + vector[i] + "</td>";
+                }
+                cuerpo.appendChild(filaIndices);
+                cuerpo.appendChild(filaValores);
+            }
+        }
+
+        // Cargar Vector: llena el vector con números aleatorios entre 0 y 20
+        // (rango pequeño para que haya números repetidos y se pueda probar la moda)
+        function cargarVector() {
+            const n = parseInt(selectDimension.value);
+            vector = [];
+            for (let i = 0; i < n; i++) {
+                vector.push(Math.floor(Math.random() * 21));
+            }
+            mostrarVector();
+            mostrarRespuesta("Vector cargado con " + n + " elementos");
+        }
+
+        // Vaciar Vector: deja el vector sin elementos
+        function vaciarVector() {
+            vector = [];
+            mostrarVector();
+            mostrarRespuesta("El vector fue vaciado");
+        }
+
+        // Validación común: devuelve true si hay datos; si no, avisa en "Resultado".
+        // Uso: if (!vectorTieneElementos()) return;
+        function vectorTieneElementos() {
+            if (vector.length === 0) {
+                mostrarRespuesta("Error: el vector está vacío. Presione 'Cargar Vector'.");
+                return false;
+            }
+            return true;
+        }
+
+        // Event listeners de la base
+        document.getElementById("btn-cargar-vector").addEventListener("click", cargarVector);
+        document.getElementById("btn-vaciar-vector").addEventListener("click", vaciarVector);
+
+
+        // =====================================================================
+        // ===== INICIO: Integrante 1 - Número Mayor y Número Menor =====
+        // Formato esperado: "Valor Mínimo: 5 (encontrado en posición 2)"
+        // =====================================================================
+        // Revisa que todos los elementos del vector sean números válidos.
+        // (Esta misma función está en el bloque del integrante 2 y del 3:
+        //  al juntar todo el código, basta con dejar una sola copia.)
+        function elementosSonNumeros() {
+            for (let i = 0; i < vector.length; i++) {
+                if (typeof vector[i] !== "number" || isNaN(vector[i])) {
+                    mostrarRespuesta("Error: el valor en la posición " + i + " no es un número válido");
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        // Arma el texto de las posiciones: "posición 2" o "posiciones 2, 5, 9"
+        function textoPosiciones(posiciones) {
+            if (posiciones.length === 1) {
+                return "posición " + posiciones[0];
+            }
+            return "posiciones " + posiciones.join(", ");
+        }
+
+        // Botón "Numero Mayor"
+        // Algoritmo: se supone que el primer elemento es el mayor y se recorre
+        // el resto del vector comparando. Si aparece uno más grande, se cambia
+        // el mayor y se reinicia la lista de posiciones. Si aparece uno igual,
+        // se agrega su posición (así se muestran todas las repeticiones).
+        function numeroMayor() {
+            // Validaciones: vector con elementos y todos numéricos
+            if (!vectorTieneElementos()) return;
+            if (!elementosSonNumeros()) return;
+
+            let mayor = vector[0];       // empezamos suponiendo que el primero es el mayor
+            let posiciones = [0];        // posiciones donde está el mayor
+
+            for (let i = 1; i < vector.length; i++) {
+                if (vector[i] > mayor) {
+                    mayor = vector[i];   // encontramos uno más grande
+                    posiciones = [i];    // la lista de posiciones vuelve a empezar
+                } else if (vector[i] === mayor) {
+                    posiciones.push(i);  // está repetido: guardamos también esta posición
+                }
+            }
+
+            mostrarRespuesta("Valor Máximo: " + mayor + " (encontrado en " + textoPosiciones(posiciones) + ")");
+        }
+
+        // Botón "Numero Menor"
+        // Algoritmo: igual que el mayor, pero se busca el valor más pequeño.
+        function numeroMenor() {
+            // Validaciones: vector con elementos y todos numéricos
+            if (!vectorTieneElementos()) return;
+            if (!elementosSonNumeros()) return;
+
+            let menor = vector[0];       // empezamos suponiendo que el primero es el menor
+            let posiciones = [0];        // posiciones donde está el menor
+
+            for (let i = 1; i < vector.length; i++) {
+                if (vector[i] < menor) {
+                    menor = vector[i];   // encontramos uno más pequeño
+                    posiciones = [i];    // la lista de posiciones vuelve a empezar
+                } else if (vector[i] === menor) {
+                    posiciones.push(i);  // está repetido: guardamos también esta posición
+                }
+            }
+
+            mostrarRespuesta("Valor Mínimo: " + menor + " (encontrado en " + textoPosiciones(posiciones) + ")");
+        }
+
+        document.getElementById("btn-numero-mayor").addEventListener("click", numeroMayor);
+        document.getElementById("btn-numero-menor").addEventListener("click", numeroMenor);
+        // ===== FIN: Integrante 1 =====
+
+
+        // =====================================================================
+        // ===== INICIO: Integrante 2 - Suma Total y Producto Total =====
+        // =====================================================================
+        function sumaValores() {
+            // TODO: validar y sumar todos los elementos
+            mostrarRespuesta("Pendiente: Suma de Valores");
+        }
+
+        function productoValores() {
+            // TODO: validar y multiplicar todos los elementos (cuidado con los ceros)
+            mostrarRespuesta("Pendiente: Producto de Valores");
+        }
+
+        document.getElementById("btn-sumar-valores").addEventListener("click", sumaValores);
+        document.getElementById("btn-producto-vector").addEventListener("click", productoValores);
+        // ===== FIN: Integrante 2 =====
+
+
+        // =====================================================================
+        // ===== INICIO: Integrante 3 - Media, Mediana y Moda =====
+        // =====================================================================
+        function calcularMedia() {
+            // TODO: validar, sumar y dividir entre la cantidad de elementos
+            mostrarRespuesta("Pendiente: Media");
+        }
+
+        function calcularMediana() {
+            // TODO: validar, ordenar una COPIA del vector (no el original) y tomar el centro
+            mostrarRespuesta("Pendiente: Mediana");
+        }
+
+        function calcularModa() {
+            // TODO: validar, contar repeticiones y mostrar el valor que más se repite
+            mostrarRespuesta("Pendiente: Moda");
+        }
+
+        document.getElementById("btn-calcular-media").addEventListener("click", calcularMedia);
+        document.getElementById("btn-calcular-mediana").addEventListener("click", calcularMediana);
+        document.getElementById("btn-calcular-moda").addEventListener("click", calcularModa);
+        // ===== FIN: Integrante 3 =====
+
+
+        // =====================================================================
+        // ===== INICIO: Integrante 4 - Ordenar por Selección (ASC/DESC) =====
+        // El orden elegido está en: selectOrden.value  ("ASC" o "DESC")
+        // =====================================================================
+        function ordenarSeleccion() {
+            // TODO: validar, ordenar el vector con selección, luego llamar mostrarVector()
+            mostrarRespuesta("Pendiente: Ordenar Selección");
+        }
+
+        document.getElementById("btn-ordenar-seleccion").addEventListener("click", ordenarSeleccion);
+        // ===== FIN: Integrante 4 =====
+
+
+        // =====================================================================
+        // ===== INICIO: Integrante 5 - Ordenar Burbuja (ASC/DESC) =====
+        // El orden elegido está en: selectOrden.value  ("ASC" o "DESC")
+        // =====================================================================
+        function ordenarBurbuja() {
+            // TODO: validar, ordenar el vector con burbuja, luego llamar mostrarVector()
+            mostrarRespuesta("Pendiente: Ordenar Burbuja");
+        }
+
+        document.getElementById("btn-ordenar-burbuja").addEventListener("click", ordenarBurbuja);
+        // ===== FIN: Integrante 5 =====
+    </script>
+</body>
+
+</html>
